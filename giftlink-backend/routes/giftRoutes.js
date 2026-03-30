@@ -1,46 +1,36 @@
-router.get('/', async (req, res) => {
-    try {
-        // Task 1: Connect to MongoDB and store connection to db constant
-        // const db = {{insert code here}}
+// giftRoutes.js
+const express = require('express');
+const router = express.Router();   // <-- esto faltaba
 
-        // Task 2: use the collection() method to retrieve the gift collection
-        // {{insert code here}}
+const { connectToDatabase } = require('../models/db'); // tu función de conexión
 
-        // Task 3: Fetch all gifts using the collection.find method. Chain with toArray method to convert to JSON array
-        // const gifts = {{insert code here}}
-
-        // Task 4: return the gifts using the res.json method
-        res.json(/* {{insert code here}} */);
-    } catch (e) {
-        console.error('Error fetching gifts:', e);
-        res.status(500).send('Error fetching gifts');
-    }
+// GET todos los regalos
+router.get("/", async (req, res) => {
+  try {
+    const db = await connectToDatabase();
+    const collection = db.collection("gifts");
+    const gifts = await collection.find({}).toArray();
+    res.json(gifts);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
-router.get('/:id', async (req, res) => {
-    try {
-        // Task 1: Connect to MongoDB and store connection to db constant
-        // const db = {{insert code here}}
-
-        // Task 2: use the collection() method to retrieve the gift collection
-        // {{insert code here}}
-
-        const id = req.params.id;
-
-        // Task 3: Find a specific gift by ID using the collection.fineOne method and store in constant called gift
-        // {{insert code here}}
-
-        if (!gift) {
-            return res.status(404).send('Gift not found');
-        }
-
-        res.json(gift);
-    } catch (e) {
-        console.error('Error fetching gift:', e);
-        res.status(500).send('Error fetching gift');
-    }
+// GET regalo por id
+router.get("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const db = await connectToDatabase();
+    const collection = db.collection("gifts");
+    const gift = await collection.findOne({ id: id });
+    if (!gift) return res.status(404).json({ error: "Gift not found" });
+    res.json(gift);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
+module.exports = router;  // <-- exporta el router
 
 
 // Add a new gift
