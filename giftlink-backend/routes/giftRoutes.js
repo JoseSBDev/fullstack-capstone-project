@@ -43,13 +43,18 @@ router.post('/', async (req, res, next) => {
 	try {
 		const db = await connectToDatabase();
 		const collection = db.collection("gifts");
-		const gift = await collection.insertOne(req.body);
+		const result = await collection.insertOne(req.body);
 
-		res.status(201).json(gift.ops[0]);
+		// Fixed: MongoDB 6.8.0 doesn't have .ops property
+		// Instead, return the insertedId with the original data
+		res.status(201).json({
+			_id: result.insertedId,
+			...req.body
+		});
 	} catch (e) {
+		logger.error('Error creating gift:', e);
 		next(e);
 	}
 });
 
 module.exports = router;
-
